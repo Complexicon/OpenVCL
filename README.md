@@ -39,9 +39,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
 ```
 
 ## Pictures
-The Yellow Square you can see is for debugging and showing the Cursor Position.
 ![The debug button was pressed](https://i.imgur.com/6zOzCyL.png)
 ![Debug button not pressed](https://i.imgur.com/Dm5EAZB.png)
+The Yellow Square you can see is for debugging and showing the Cursor Position.
 
 
 ## The Current version is a very early Debug Version of OpenVCL and very unstable as it is at the start of Development right now!
