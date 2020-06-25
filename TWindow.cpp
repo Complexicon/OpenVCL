@@ -105,59 +105,23 @@ void TWindow::OnPaint() {
 
 		pRenderTarget->Clear(D2D1::ColorF(0.1, 0.1, 0.1));
 
-		int x = 50;
-		int y = 50;
-		int sizeX = 96;
-		int sizeY = 32;
+		// Draw all Controls.
+		for (size_t i = 0; i < controls.length(); i++)
+			controls.get(i)->Draw(pRenderTarget, pBrush, pTextFormat);
 
-		D2D1_RECT_F rct;
-		rct.top = y;
-		rct.bottom = y + sizeY;
-		rct.left = x;
-		rct.right = x + sizeX;
 
-		D2D1_ROUNDED_RECT r;
-		r.radiusX = r.radiusY = sizeY / 2;
-		r.rect = rct;
-
-		// Intersect Test Begin
-		// Check if mouse is in Rect Bounding Box
-
-		bool isInRectBounds = testX > rct.left && testX < rct.right&& testY > rct.top && testY < rct.bottom;
-
-		if (isInRectBounds) {
-			// Green Base if mbutton left down
-			if(mb_down) {
-				pBrush->SetColor(D2D1::ColorF(0.15, 0.15, 0.15));
-				pRenderTarget->FillRoundedRectangle(r, pBrush);
-				pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::White));
-				// Set the ButtonControl pressed state; last state is used in WM_LBUTTONUP.
-				buttonPressed = true;
-			}
-			else {
-				pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::White));
-				buttonPressed = false;
-			}
-		} else {
-			pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Gray));
-			buttonPressed = false;
-		}
-
-		// END
-
-		// TODO: Optimize a lot.
-
-		pRenderTarget->DrawRoundedRectangle(&r, pBrush, 2);
-		// TODO-FIX: inline stringlength   v
-		pRenderTarget->DrawText(L"Button", 6, pTextFormat, rct, pBrush);
-
+#ifdef _DEBUG_OVCL
 		// DEBUG DRAWINGS
 		pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Yellow, 0.5));
-		pRenderTarget->FillRectangle({ (float)testX -5, (float)testY-5, (float)testX + 5, (float)testY + 5 }, pBrush);
+		pRenderTarget->FillRectangle({ (float)lastMouseX -5, (float)lastMouseY-5, (float)lastMouseX + 5, (float)lastMouseY + 5 }, pBrush);
 
-		// Debug Button OnClick Event
-		if (executeEvent)
-			pRenderTarget->DrawText(L"Debug Buttonpress Triggered", 27, pTextFormat, D2D1::RectF(0,0,200,50), pBrush);
+		// Draw Controls Bounding Boxes
+		for (size_t i = 0; i < controls.length(); i++)
+			pRenderTarget->DrawRectangle(controls.get(i)->boundingBox, pBrush);
+
+		// END DEBUG DRAWINGS
+#endif
+
 
 		// End Scene
 
@@ -203,23 +167,22 @@ LRESULT TWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		return 0;
 
 	case WM_MOUSEMOVE:
-		testX = lParam & 0xffff;
-		testY = (lParam >> 16) & 0xffff;
+		lastMouseX = LOWORD(lParam);
+		lastMouseY = HIWORD(lParam);
 		InvalidateRect(m_hwnd, NULL, FALSE);
 		return 0;
+
 	case WM_LBUTTONDOWN:
-		mb_down = true;
+		for (size_t i = 0; i < controls.length(); i++) {
+			if (controls.get(i)->InBounds(LOWORD(lParam), HIWORD(lParam)))
+				controls.get(i)->OnClick(false);
+		}
 		InvalidateRect(m_hwnd, NULL, FALSE);
 		return 0;
 
 	case WM_LBUTTONUP:
-		mb_down = false;
-		// Debug Button Presses
-		// TODO: Create Classes for Controls.
-		if (buttonPressed) {
-			executeEvent = !executeEvent;
-			buttonPressed = false;
-		}
+		for (size_t i = 0; i < controls.length(); i++)
+			controls.get(i)->OnClick(true);
 		InvalidateRect(m_hwnd, NULL, FALSE);
 		return 0;
 	}

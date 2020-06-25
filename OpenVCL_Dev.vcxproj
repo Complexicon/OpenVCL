@@ -102,9 +102,11 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="TButton.cpp" />
     <ClCompile Include="TWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Helper\PointerList.h" />
     <ClInclude Include="OpenVCL.h" />
   </ItemGroup>
   <ItemGroup>
