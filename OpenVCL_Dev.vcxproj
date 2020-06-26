@@ -108,6 +108,7 @@
   <ItemGroup>
     <ClInclude Include="Helper\PointerList.h" />
     <ClInclude Include="OpenVCL.h" />
+    <ClInclude Include="typedefs.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

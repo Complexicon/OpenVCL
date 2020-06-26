@@ -7,6 +7,7 @@ void Application::Initialize() {
 	WNDCLASS wc = { 0 };
 	wc.lpfnWndProc = TWindow::WindowProc;
 	wc.hInstance = GetModuleHandle(NULL);
+	wc.hCursor = LoadCursor(0, IDC_ARROW);
 	wc.lpszClassName = ClassName;
 	RegisterClass(&wc);
 }

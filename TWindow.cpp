@@ -103,11 +103,11 @@ void TWindow::OnPaint() {
 
 		pRenderTarget->BeginDraw();
 
-		pRenderTarget->Clear(D2D1::ColorF(0.1, 0.1, 0.1));
+		pRenderTarget->Clear(background);
 
-		// Draw all Controls.
-		for (size_t i = 0; i < controls.length(); i++)
-			controls.get(i)->Draw(pRenderTarget, pBrush, pTextFormat);
+		// Draw all Controls. draw in reverse order
+		for (size_t i = controls.length(); 0 < i; i--)
+			controls.get(i - 1)->Draw(pRenderTarget, pBrush, pTextFormat);
 
 
 #ifdef _DEBUG_OVCL
@@ -139,7 +139,7 @@ void TWindow::Resize() {
 	RECT rc;
 	GetClientRect(m_hwnd, &rc);
 	pRenderTarget->Resize({ (UINT32)rc.right, (UINT32)rc.bottom });
-	InvalidateRect(m_hwnd, nullptr, false);
+	Update();
 }
 
 LRESULT TWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -169,21 +169,23 @@ LRESULT TWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_MOUSEMOVE:
 		lastMouseX = LOWORD(lParam);
 		lastMouseY = HIWORD(lParam);
-		InvalidateRect(m_hwnd, NULL, FALSE);
+		Update();
 		return 0;
 
 	case WM_LBUTTONDOWN:
 		for (size_t i = 0; i < controls.length(); i++) {
-			if (controls.get(i)->InBounds(LOWORD(lParam), HIWORD(lParam)))
-				controls.get(i)->OnClick(false);
+			if (controls.get(i)->InBounds(LOWORD(lParam), HIWORD(lParam))) {
+				controls.get(i)->MD();
+				break;
+			}
 		}
-		InvalidateRect(m_hwnd, NULL, FALSE);
+		Update();
 		return 0;
 
 	case WM_LBUTTONUP:
 		for (size_t i = 0; i < controls.length(); i++)
-			controls.get(i)->OnClick(true);
-		InvalidateRect(m_hwnd, NULL, FALSE);
+			controls.get(i)->MU();
+		Update();
 		return 0;
 	}
 

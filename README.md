@@ -1,6 +1,6 @@
 # OpenVCL Debug Project and Source
 
-Current version: 0.0.3-veryearlybeta
+Current version: OpenVCL v0.0.37-alpha
 
 ## What is OpenVCL?
 OpenVCL stands for Open Visual Component Library aiming to be a very robust Framework for creating Graphical C++ Applications for Windows whilst being as easy to use as possible.
@@ -28,6 +28,10 @@ public:
 		SetName(L"Test");
 		// example: Set starting position
 		SetPos(500, 500);
+
+		// Add some Controls Maybe? x:50 y:20
+		controls.append(new TButton(this, 50, 20, L"My first Button"));
+
 	}
 };
 

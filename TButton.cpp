@@ -2,35 +2,11 @@
 
 void TButton::Draw(ID2D1HwndRenderTarget* pRenderTarget, ID2D1SolidColorBrush* pBrush, IDWriteTextFormat* pTextFormat) {
 
-	D2D1_ROUNDED_RECT r;
-	r.radiusX = r.radiusY = sizeY / 2;
-	r.rect = boundingBox;
-
-	/*
-	
-			if (isInRectBounds) {
-			// Green Base if mbutton left down
-			if(mb_down) {
-				pBrush->SetColor(D2D1::ColorF(0.15, 0.15, 0.15));
-				pRenderTarget->FillRoundedRectangle(r, pBrush);
-				pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::White));
-				// Set the ButtonControl pressed state; last state is used in WM_LBUTTONUP.
-				buttonPressed = true;
-			}
-			else {
-				pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::White));
-				buttonPressed = false;
-			}
-		} else {
-			pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Gray));
-			buttonPressed = false;
-		}
-	
-	*/
+	D2D1_ROUNDED_RECT r = {boundingBox, radius, radius };
 
 	if (InBounds(owner->GetLastMouseX(), owner->GetLastMouseY())) {
 		if (clicked) {
-			pBrush->SetColor(D2D1::ColorF(0.15, 0.15, 0.15));
+			pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::White, 0.1));
 			pRenderTarget->FillRoundedRectangle(r, pBrush);
 		}
 		pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::White));
@@ -38,23 +14,28 @@ void TButton::Draw(ID2D1HwndRenderTarget* pRenderTarget, ID2D1SolidColorBrush* p
 		pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Gray));
 
 	pRenderTarget->DrawRoundedRectangle(r, pBrush, 2);
-	// TODO-FIX: inline stringlength   v
-	pRenderTarget->DrawText(L"Button", 6, pTextFormat, boundingBox, pBrush);
+	pRenderTarget->DrawText(label, wcslen(label), pTextFormat, boundingBox, pBrush);
 }
 
-void TButton::OnClick(bool release) {
-	clicked = !release;
+void TButton::MD() {
+	clicked = true;
 }
 
-TButton::TButton(TWindow* owner, int x, int y) : TControl(owner) {
+void TButton::MU() {
+	if (clicked && InBounds(owner->GetLastMouseX(), owner->GetLastMouseY()) && OnClick != nullptr)
+		OnClick(this);
+	clicked = false;
+}
 
+TButton::TButton(TWindow* owner, int x, int y, PCWSTR label) : TControl(owner) {
+
+	this->label = label;
 	this->x = x;
 	this->y = y;
-	sizeX = 96;
-	sizeY = 32;
+	sizeX = 60;
+	sizeY = 24;
 
-	boundingBox.left = x;
-	boundingBox.right = x + sizeX;
-	boundingBox.top = y;
-	boundingBox.bottom = y + sizeY;
+	radius = sizeY / 2;
+
+	UpdateBoundingBox();
 }
