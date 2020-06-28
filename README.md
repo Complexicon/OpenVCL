@@ -1,6 +1,6 @@
 # OpenVCL Debug Project and Source
 
-Current version: OpenVCL v0.0.37-alpha
+Current version: OpenVCL v0.0.38-alpha
 
 ## What is OpenVCL?
 OpenVCL stands for Open Visual Component Library aiming to be a very robust Framework for creating Graphical C++ Applications for Windows whilst being as easy to use as possible.
@@ -18,37 +18,41 @@ Features (hopefully):
 ```cpp
 #include "OpenVCL.h"
 
-class Window1 : public TWindow {
-public:
-	// NOTE: you dont have to put anything in the constructor
-	Window1() {
-		// example: Set window size
-		SetSize(200, 100);
-		// example: Set window title
-		SetName(L"Test");
-		// example: Set starting position
-		SetPos(500, 500);
-
-		// Add some Controls Maybe? x:50 y:20
-		controls.append(new TButton(this, 50, 20, L"My first Button"));
-
-	}
-};
-
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
+	// Create a Window
+	TWindow* window = new TWindow();
+
+	// Set Window Parameters
+	window->SetSize(250, 250);
+	window->SetName(L"Test");
+	window->SetPos(500, 500);
+
+	// Create a Button for example
+	// 'window' is its owner, position is x:10 y:25 and the button-label is 'Test'
+	TButton* button = new TButton(window, 10, 25, L"Test");
+
+	// OnClick Handler
+	// Can take a function pointer or lambda
+	// example: set sender's (button's) position to a random value between 0 and 180 for x and y
+	button->OnClick = [](TControl* sender) { sender->SetPos(rand() % 180, rand() % 180); };
+
+	// Add 'button' to the controls-list of the window
+	window->controls.append(button);
+
+	// initialize and run the window.
 	Application::Initialize();
-	Application::Run(new Window1());
+	Application::Run(window);
 	return 0;
 }
 ```
 
-## Pictures (The Yellow Square you can see is for debugging and showing the Cursor Position.)
-![The debug button was pressed](https://i.imgur.com/6zOzCyL.png)
-![Debug button not pressed](https://i.imgur.com/Dm5EAZB.png)
+## Demo Pictures
+![Demo Button and Close Box](https://i.imgur.com/33twnb1.png)
+![Multiple Controls (Buttons)](https://i.imgur.com/o7EViYl.png)
 
 
 
-## The Current version is a very early Debug Version of OpenVCL and very unstable as it is at the start of Development right now!
+### The Current version is a very early Debug Version of OpenVCL and very unstable as it is at the start of Development right now!
 
 ### Credits
-Microsoft Documentation
+- Microsoft Documentation
