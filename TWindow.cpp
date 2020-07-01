@@ -105,6 +105,21 @@ void TWindow::OnPaint() {
 
 		pRenderTarget->Clear(background);
 
+		// Closebutton
+
+		float sizeXClose = 45;
+		float sizeYClose = 25;
+
+		pBrush->SetColor(D2D1::ColorF(1, 0, 0));
+		pRenderTarget->FillRectangle({(float)Width - sizeXClose, 0, (float)Width, sizeYClose }, pBrush);
+		
+		float offsetY = 8;
+		float offsetX = 18;
+
+		pBrush->SetColor(D2D1::ColorF(1, 1, 1));
+		pRenderTarget->DrawLine({ (float)Width - sizeXClose + offsetX, offsetY }, { (float)Width - offsetX, sizeYClose - offsetY }, pBrush, 1.5f);
+		pRenderTarget->DrawLine({ (float)Width - sizeXClose + offsetX, sizeYClose - offsetY }, { (float)Width - offsetX, offsetY }, pBrush, 1.5f);
+
 		// Draw all Controls. draw in reverse order
 		for (size_t i = controls.length(); 0 < i; i--)
 			controls.get(i - 1)->Draw(pRenderTarget, pBrush, pTextFormat);
