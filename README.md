@@ -30,7 +30,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, int nCmdShow) {
 
 	// Create a Button for example
 	// 'window' is its owner, position is x:10 y:25 and the button-label is 'Test'
-	TButton button(&window, 10, 25, "Buttön");
+	TButton button(&window, 10, 25, "Test");
 
 	// OnClick Handler
 	// Can take a function pointer or lambda
