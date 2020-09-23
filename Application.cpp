@@ -1,6 +1,6 @@
 #include "OpenVCL.h"
 
-PCWSTR Application::ClassName = L"OpenVCLWindow";
+str Application::ClassName = "OpenVCLWindow";
 
 void Application::Initialize() {
 	// register OpenVCLWindow
@@ -13,7 +13,7 @@ void Application::Initialize() {
 }
 
 void Application::Run(TWindow* w) {
-	CreateWindowExW(
+	CreateWindowExA(
 		w->ExtendedWindowStyle,
 		ClassName,
 		w->WindowName,
@@ -22,15 +22,15 @@ void Application::Run(TWindow* w) {
 		w->Width,
 		w->Height,
 		nullptr, nullptr,
-		GetModuleHandle(nullptr), w
+		GetModuleHandleA(nullptr), w
 	);
 	w->Show();
 
 	// main program loop
 	MSG msg = { 0 };
-	while (GetMessage(&msg, NULL, 0, 0)) {
+	while (GetMessageA(&msg, 0, 0, 0)) {
 		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		DispatchMessageA(&msg);
 	}
 
 }

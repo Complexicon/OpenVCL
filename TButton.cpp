@@ -14,20 +14,29 @@ void TButton::Draw(ID2D1HwndRenderTarget* pRenderTarget, ID2D1SolidColorBrush* p
 		pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Gray));
 
 	pRenderTarget->DrawRoundedRectangle(r, pBrush, 2);
-	pRenderTarget->DrawText(label, wcslen(label), pTextFormat, boundingBox, pBrush);
+
+	const size_t cSize = strlen(label) + 1;
+	wchar_t* wc = new wchar_t[cSize];
+	mbstowcs(wc, label, cSize);
+
+	pRenderTarget->DrawTextA(wc, cSize, pTextFormat, boundingBox, pBrush);
 }
 
-void TButton::MD() {
-	clicked = true;
+void TButton::UserInputEvent(InputType inputType, ulong64 param) {
+	switch (inputType) {
+	case InputType::Mouse:
+		if (param == 1) clicked = true;
+		else {
+			if (clicked && InBounds(owner->GetLastMouseX(), owner->GetLastMouseY()) && OnClick != nullptr)
+				OnClick(this);
+			clicked = false;
+		}
+		break;
+	}
+
 }
 
-void TButton::MU() {
-	if (clicked && InBounds(owner->GetLastMouseX(), owner->GetLastMouseY()) && OnClick != nullptr)
-		OnClick(this);
-	clicked = false;
-}
-
-TButton::TButton(TWindow* owner, int x, int y, PCWSTR label) : TControl(owner) {
+TButton::TButton(TWindow* owner, int x, int y, str label) : TControl(owner) {
 
 	this->label = label;
 	this->x = x;

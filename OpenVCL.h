@@ -3,7 +3,7 @@
 
 /*
 
-	OpenVCL v0.0.38-alpha
+	OpenVCL v0.0.41-alpha
 	MADE BY COMPLEXICON aka cmplx
 
 */
@@ -22,15 +22,20 @@
 #pragma comment(lib, "dwrite")
 
 #include "Helper/PointerList.h"
+#include "types.h"
 
+class Application;
 class TWindow;
+class TControl;
+class Renderer;
+
+enum class InputType { Key, Mouse };
 
 class TControl {
 protected:
 	D2D1_RECT_F boundingBox = { 0 };
-	TWindow* owner;
-	int x = -1;
-	int y = -1;
+	int x = 0;
+	int y = 0;
 	int sizeX = 0;
 	int sizeY = 0;
 
@@ -42,18 +47,14 @@ protected:
 	}
 
 public:
+	TWindow* owner;
 	TControl(TWindow* owner) { this->owner = owner; };
 	bool InBounds(int x, int y) { return IN_BOUNDS(x, y, boundingBox); }
-	void SetSize(int length, int height) { sizeX = length; sizeY = height; UpdateBoundingBox(); }
+	void SetSize(int width, int height) { sizeX = width; sizeY = height; UpdateBoundingBox(); }
 	void SetPos(int x, int y) { this->x = x; this->y = y; UpdateBoundingBox(); }
 
 	virtual void Draw(ID2D1HwndRenderTarget* pRenderTarget, ID2D1SolidColorBrush* pBrush, IDWriteTextFormat* pTextFormat) = 0;
-
-
-	// Mouse Button Handling POC
-	virtual void MD() {};
-	virtual void MU() {};
-
+	virtual void UserInputEvent(InputType inputType, ulong64 param) {};
 
 	friend class TWindow;
 };
@@ -62,40 +63,15 @@ class TButton : public TControl {
 private:
 	bool clicked = false;
 public:
-	TButton(TWindow* owner, int x, int y, PCWSTR label);
+	TButton(TWindow* owner, int x, int y, str label);
 	void Draw(ID2D1HwndRenderTarget* pRenderTarget, ID2D1SolidColorBrush* pBrush, IDWriteTextFormat* pTextFormat) override;
-	void MD() override;
-	void MU() override;
+	void UserInputEvent(InputType inputType, ulong64 param) override;
 
 	void (*OnClick)(TControl* Sender) = 0;
 
-	PCWSTR label = L"Button";
+	str label = "Button";
 	int radius = 0;
 };
-
-class TExitButton : public TControl {
-public:
-	bool clicked = false;
-	float sizeXClose = 45;
-	float sizeYClose = 25;
-	float offsetY = 8;
-	float offsetX = 18;
-
-	void Draw(ID2D1HwndRenderTarget* pRenderTarget, ID2D1SolidColorBrush* pBrush, IDWriteTextFormat* pTextFormat) override;
-	void MD() override;
-	void MU() override;
-
-	TExitButton(TWindow* owner);
-
-};
-
-/*
-class TTitleBar : public TControl {
-	void Draw(ID2D1HwndRenderTarget* pRenderTarget, ID2D1SolidColorBrush* pBrush, IDWriteTextFormat* pTextFormat) override;
-	void MD() override;
-	void MU() override;
-};
-*/
 
 class TWindow {
 public:
@@ -106,8 +82,8 @@ public:
 	int GetHeight();
 	int GetWindowX();
 	int GetWindowY();
-	PCWSTR GetWindowName();
-	DWORD GetCurrentStyle();
+	str GetWindowName();
+	uint32 GetCurrentStyle();
 	PointerList<TControl> controls;
 	D2D1::ColorF background = D2D1::ColorF(0.1, 0.1, 0.1);
 
@@ -117,8 +93,8 @@ public:
 	//SETTER
 	void SetSize(int Width, int Height);
 	void SetPos(int X, int Y);
-	void SetName(PCWSTR WindowName);
-	void SetStyle(DWORD WindowStyle);
+	void SetName(str WindowName);
+	void SetStyle(uint32 WindowStyle);
 
 	//Functions
 	void Show(int type = SW_SHOWNORMAL);
@@ -134,9 +110,9 @@ private:
 	IDWriteFactory* pDWriteFactory = 0;
 	HWND m_hwnd = 0;
 
-	PCWSTR WindowName = L"Window";
-	DWORD WindowStyle = WS_POPUP;
-	DWORD ExtendedWindowStyle = 0;
+	str WindowName = "Window";
+	uint32 WindowStyle = WS_OVERLAPPEDWINDOW;
+	uint32 ExtendedWindowStyle = 0;
 	int Width = CW_USEDEFAULT;
 	int Height = CW_USEDEFAULT;
 	int x = CW_USEDEFAULT;
@@ -144,17 +120,6 @@ private:
 
 	int lastMouseX = 0;
 	int lastMouseY = 0;
-
-	// DEBUG VARS
-	bool mb_down = false;
-	bool buttonPressed = false;
-	bool executeEvent = false;
-	// END DEBUG VARS
-
-	TExitButton* exit = new TExitButton(this);
-
-	bool titlebarMD = false;
-	D2D_RECT_F titlebar;
 
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -169,10 +134,18 @@ private:
 
 class Application {
 private:
-	static PCWSTR ClassName;
+	static str ClassName;
 public:
 	static void Initialize();
 	static void Run(TWindow* window);
+};
+
+class Renderer {
+
+};
+
+class RendererWin : public Renderer {
+
 };
 
 #endif

@@ -1,6 +1,6 @@
 # OpenVCL Debug Project and Source
 
-Current version: OpenVCL v0.0.40-alpha
+Current version: OpenVCL v0.0.41-alpha
 
 ## What is OpenVCL?
 OpenVCL stands for Open Visual Component Library aiming to be a very robust Framework for creating Graphical C++ Applications for Windows whilst being as easy to use as possible.
@@ -18,23 +18,24 @@ Features (hopefully):
 ```cpp
 #include "OpenVCL.h"
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, int nCmdShow) {
+
 	// Create a Window
 	TWindow window;
 
 	// Set Window Parameters
 	window.SetSize(250, 250);
-	window.SetName(L"testing 1");
+	window.SetName("testing 1");
 	window.SetPos(500, 500);
 
 	// Create a Button for example
 	// 'window' is its owner, position is x:10 y:25 and the button-label is 'Test'
-	TButton button(&window, 10, 25, L"Button");
+	TButton button(&window, 10, 25, "Buttön");
 
 	// OnClick Handler
 	// Can take a function pointer or lambda
 	// example: set sender's (button's) position to a random value between 0 and 180 for x and y
-	button.OnClick = [](TControl* sender) { sender->SetPos(rand() % 180, rand() % 180); };
+	button.OnClick = [](TControl* sender) { sender->SetPos(rand() % sender->owner->GetWidth(), rand() % sender->owner->GetHeight()); };
 
 	// Add 'button' to the controls-list of the window
 	window.controls.append(&button);

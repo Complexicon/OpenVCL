@@ -11,14 +11,14 @@ int TWindow::GetWidth() { return Width; }
 int TWindow::GetHeight() { return Height; }
 int TWindow::GetWindowX() { return x; }
 int TWindow::GetWindowY() { return y; }
-PCWSTR TWindow::GetWindowName() { return WindowName; }
-DWORD TWindow::GetCurrentStyle() { return WindowStyle; }
+str TWindow::GetWindowName() { return WindowName; }
+uint32 TWindow::GetCurrentStyle() { return WindowStyle; }
 
 #pragma endregion
 
 #pragma region Setter
 
-void TWindow::SetStyle(DWORD WindowStyle) {
+void TWindow::SetStyle(uint32 WindowStyle) {
 	this->WindowStyle = WindowStyle;
 	if (m_hwnd) SetWindowLongPtr(m_hwnd, GWL_STYLE, WindowStyle);
 }
@@ -35,7 +35,7 @@ void TWindow::SetPos(int X, int Y) {
 	if (m_hwnd) SetWindowPos(m_hwnd, nullptr, X, Y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 }
 
-void TWindow::SetName(PCWSTR WindowName) {
+void TWindow::SetName(str WindowName) {
 	this->WindowName = WindowName;
 	if (m_hwnd) SetWindowText(m_hwnd, WindowName);
 }
@@ -107,28 +107,21 @@ void TWindow::OnPaint() {
 
 		// dirty dirty testing code
 
-		titlebar = { 0, 0, (float)Width - 45, 25 };
-
 		pRenderTarget->BeginDraw();
 
 		pRenderTarget->Clear(background);
 
-		// Titlebar Text (buggy)
-		//pBrush->SetColor(D2D1::ColorF(1, 1, 1, 0.5));
-		//pRenderTarget->DrawText(WindowName, wcslen(WindowName), pTextFormat, titlebar, pBrush);
 
-		// Accent Color
-		pBrush->SetColor(D2D1::ColorF(1, 0.5, 0));
-		pRenderTarget->DrawLine({ 0, 0 }, { (float)Width, 0 }, pBrush, 5);
-
-		exit->Draw(pRenderTarget, pBrush, pTextFormat);
-
-		// Draw all Controls. draw in reverse order
+		// Draw all Controls. draw in reverse order so element 0 has the highest z-order
 		for (size_t i = controls.length(); 0 < i; i--)
 			controls.get(i - 1)->Draw(pRenderTarget, pBrush, pTextFormat);
 
-
 #ifdef _DEBUG_OVCL
+
+		Console::Log("update frame");
+		Console::Log(this->GetWidth());
+		Console::Log(this->GetHeight());
+
 		// DEBUG DRAWINGS
 		pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Yellow, 0.5));
 		pRenderTarget->FillRectangle({ (float)lastMouseX -5, (float)lastMouseY-5, (float)lastMouseX + 5, (float)lastMouseY + 5 }, pBrush);
@@ -157,6 +150,8 @@ void TWindow::Resize() {
 	RECT rc;
 	GetClientRect(m_hwnd, &rc);
 	pRenderTarget->Resize({ (UINT32)rc.right, (UINT32)rc.bottom });
+	this->Width = rc.right;
+	this->Height = rc.bottom;
 	Update();
 }
 
@@ -169,7 +164,9 @@ LRESULT TWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		if (FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(pDWriteFactory), reinterpret_cast<IUnknown**>(&pDWriteFactory)))) return -1;
 
 		// DEBUG CONSOLE
-		//Console::Alloc();
+#ifdef _DEBUG_OVCL
+		Console::Alloc();
+#endif
 
 		return 0;
 
@@ -190,11 +187,6 @@ LRESULT TWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_MOUSEMOVE:
 
-		if(titlebarMD){
-			SetPos(x + (LOWORD(lParam) - lastMouseX), y + (HIWORD(lParam) - lastMouseY));
-			return 0;
-		}
-
 		lastMouseX = LOWORD(lParam);
 		lastMouseY = HIWORD(lParam);
 		Update();
@@ -202,31 +194,19 @@ LRESULT TWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_LBUTTONDOWN:
 
-		if (IN_BOUNDS(LOWORD(lParam), HIWORD(lParam), titlebar)) {
-			titlebarMD = true;
-			return 0;
-		}
-
-		if (exit->InBounds(LOWORD(lParam), HIWORD(lParam))) exit->MD();
-		else {
 			for (size_t i = 0; i < controls.length(); i++) {
 				if (controls.get(i)->InBounds(LOWORD(lParam), HIWORD(lParam))) {
-					controls.get(i)->MD();
+					controls.get(i)->UserInputEvent(InputType::Mouse, 1);
 					break;
 				}
 			}
-		}
 
 		Update();
 		return 0;
 
 	case WM_LBUTTONUP:
-
-		titlebarMD = false;
-
-		exit->MU();
 		for (size_t i = 0; i < controls.length(); i++)
-			controls.get(i)->MU();
+			controls.get(i)->UserInputEvent(InputType::Mouse, 0);
 		Update();
 		return 0;
 	}
@@ -248,37 +228,3 @@ LRESULT CALLBACK TWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 }
 
 #pragma endregion
-
-void TExitButton::Draw(ID2D1HwndRenderTarget* pRenderTarget, ID2D1SolidColorBrush* pBrush, IDWriteTextFormat* pTextFormat) {
-
-	boundingBox = { (float)owner->GetWidth() - sizeXClose, 0, (float)owner->GetWidth(), sizeYClose };
-
-	if (InBounds(owner->GetLastMouseX(), owner->GetLastMouseY())) {
-		pBrush->SetColor(D2D1::ColorF(1, 0, 0));
-		pRenderTarget->FillRectangle(boundingBox, pBrush);
-
-		if (clicked) {
-			pBrush->SetColor(D2D1::ColorF(0, 0, 0, 0.4));
-			pRenderTarget->FillRectangle(boundingBox, pBrush);
-		}
-
-		pBrush->SetColor(D2D1::ColorF(1, 1, 1));
-
-	} else
-		pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Gray));
-
-	pRenderTarget->DrawLine({ (float)owner->GetWidth() - sizeXClose + offsetX, offsetY }, { (float)owner->GetWidth() - offsetX, sizeYClose - offsetY }, pBrush, 1.5f);
-	pRenderTarget->DrawLine({ (float)owner->GetWidth() - sizeXClose + offsetX, sizeYClose - offsetY }, { (float)owner->GetWidth() - offsetX, offsetY }, pBrush, 1.5f);
-}
-
-void TExitButton::MD() {
-	clicked = true;
-}
-
-void TExitButton::MU() {
-	if (clicked && InBounds(owner->GetLastMouseX(), owner->GetLastMouseY()))
-		DestroyWindow(owner->Window());
-	clicked = false;
-}
-
-TExitButton::TExitButton(TWindow* owner) : TControl(owner) {}
