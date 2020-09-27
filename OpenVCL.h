@@ -3,7 +3,7 @@
 
 /*
 
-	OpenVCL v0.0.41-alpha
+	OpenVCL v0.0.45-alpha
 	MADE BY COMPLEXICON aka cmplx
 
 */
@@ -12,7 +12,8 @@
 // Show Debug Overlay
 //#define _DEBUG_OVCL
 
-#define IN_BOUNDS(x,y,rect) x > rect.left && x < rect.right&& y > rect.top && y < rect.bottom
+#define IN_BOUNDS(x,y,bx,by,szX,szY) x >= bx && x <= (bx+szX)&& y >= by && y <= (by+szY)
+#define BYTE_TO_FLOAT(b) (b / 255.f)
 
 #include <windows.h>
 #include <d2d1.h>
@@ -29,48 +30,22 @@ class TWindow;
 class TControl;
 class Renderer;
 
-enum class InputType { Key, Mouse };
-
 class TControl {
 protected:
-	D2D1_RECT_F boundingBox = { 0 };
+public:
+	TWindow* owner;
 	int x = 0;
 	int y = 0;
 	int sizeX = 0;
 	int sizeY = 0;
 
-	void UpdateBoundingBox() {
-		boundingBox.left = x;
-		boundingBox.right = x + sizeX;
-		boundingBox.top = y;
-		boundingBox.bottom = y + sizeY;
-	}
-
-public:
-	TWindow* owner;
 	TControl(TWindow* owner) { this->owner = owner; };
-	bool InBounds(int x, int y) { return IN_BOUNDS(x, y, boundingBox); }
-	void SetSize(int width, int height) { sizeX = width; sizeY = height; UpdateBoundingBox(); }
-	void SetPos(int x, int y) { this->x = x; this->y = y; UpdateBoundingBox(); }
+	bool InBounds(int x, int y) { return IN_BOUNDS(x, y, this->x, this->y, this->sizeX, this->sizeY); }
 
-	virtual void Draw(ID2D1HwndRenderTarget* pRenderTarget, ID2D1SolidColorBrush* pBrush, IDWriteTextFormat* pTextFormat) = 0;
+	virtual void Draw(Renderer* renderer) = 0;
 	virtual void UserInputEvent(InputType inputType, ulong64 param) {};
 
 	friend class TWindow;
-};
-
-class TButton : public TControl {
-private:
-	bool clicked = false;
-public:
-	TButton(TWindow* owner, int x, int y, str label);
-	void Draw(ID2D1HwndRenderTarget* pRenderTarget, ID2D1SolidColorBrush* pBrush, IDWriteTextFormat* pTextFormat) override;
-	void UserInputEvent(InputType inputType, ulong64 param) override;
-
-	void (*OnClick)(TControl* Sender) = 0;
-
-	str label = "Button";
-	int radius = 0;
 };
 
 class TWindow {
@@ -85,7 +60,7 @@ public:
 	str GetWindowName();
 	uint32 GetCurrentStyle();
 	PointerList<TControl> controls;
-	D2D1::ColorF background = D2D1::ColorF(0.1, 0.1, 0.1);
+	Color background = Color(0x232323);
 
 	int GetLastMouseX() { return lastMouseX; };
 	int GetLastMouseY() { return lastMouseY; };
@@ -103,11 +78,8 @@ public:
 
 private:
 	//Inner Workings
-	ID2D1Factory* pFactory = 0;
-	ID2D1HwndRenderTarget* pRenderTarget = 0;
-	ID2D1SolidColorBrush* pBrush = 0;
-	IDWriteTextFormat* pTextFormat = 0;
-	IDWriteFactory* pDWriteFactory = 0;
+	Renderer* r;
+
 	HWND m_hwnd = 0;
 
 	str WindowName = "Window";
@@ -123,13 +95,12 @@ private:
 
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	HRESULT CreateGraphicsResources();
-	void DiscardGraphicsResources();
 	void OnPaint();
 	void Resize();
 	LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	friend class Application;
+	friend class Renderer;
 };
 
 class Application {
@@ -137,15 +108,33 @@ private:
 	static str ClassName;
 public:
 	static void Initialize();
+	static void CreateTWindow(TWindow* window);
 	static void Run(TWindow* window);
 };
 
 class Renderer {
+public:
+	virtual void DrawLine(int x0, int y0, int x1, int y1, const Color& color, float w = 1.f) = 0;
+	virtual void DrawRoundedRect(int x, int y, int width, int height, const Color& color, float radius = 1.f) = 0;
+	virtual void DrawString(int x, int y, int width, int height, const Color& color, str text) = 0;
 
+	virtual void FillRoundedRect(int x, int y, int width, int height, const Color& color, float radius = 1.f) = 0;
+	Renderer(TWindow* client) : client(client) {}
+protected:
+	TWindow* client;
+	virtual bool Setup() = 0;
+	virtual bool CreateTarget() = 0;
+	virtual void DiscardTarget() = 0;
+	virtual void Destroy() = 0;
+	virtual void BeginDraw() = 0;
+	virtual bool EndDraw() = 0;
+	virtual void Resize() = 0;
+	virtual void Clear(const Color& color) = 0;
+
+	friend class TWindow;
 };
 
-class RendererWin : public Renderer {
-
-};
+#include "vclrenderer.h"
+#include "vclcontrols.h"
 
 #endif

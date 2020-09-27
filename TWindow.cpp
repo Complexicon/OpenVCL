@@ -37,7 +37,7 @@ void TWindow::SetPos(int X, int Y) {
 
 void TWindow::SetName(str WindowName) {
 	this->WindowName = WindowName;
-	if (m_hwnd) SetWindowText(m_hwnd, WindowName);
+	if (m_hwnd) SetWindowTextA(m_hwnd, WindowName);
 }
 
 #pragma endregion
@@ -51,70 +51,22 @@ void TWindow::Hide() { Show(SW_HIDE); }
 
 #pragma region InternalMagic
 
-HRESULT TWindow::CreateGraphicsResources() {
-	HRESULT hr = S_OK;
-	if (pRenderTarget == NULL) {
-		RECT rc;
-		GetClientRect(m_hwnd, &rc);
-
-		//Create all graphic resources
-
-		hr = pFactory->CreateHwndRenderTarget(
-			D2D1::RenderTargetProperties(),
-			D2D1::HwndRenderTargetProperties(m_hwnd, { (UINT32)rc.right, (UINT32)rc.bottom }),
-			&pRenderTarget);
-
-		// TODO: relocate directwrite
-
-		if (SUCCEEDED(hr))
-			hr = pDWriteFactory->CreateTextFormat(
-				L"Verdana", // clean ui font imo
-				NULL,
-				DWRITE_FONT_WEIGHT_NORMAL,
-				DWRITE_FONT_STYLE_NORMAL,
-				DWRITE_FONT_STRETCH_NORMAL,
-				12,
-				L"", //locale
-				&pTextFormat
-			);
-
-		if (SUCCEEDED(hr))
-			hr = pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(0,0,0), &pBrush);
-
-		pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-		pTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-
-
-	}
-
-	return hr;
-}
-
-void TWindow::DiscardGraphicsResources() {
-	// release d2d
-	pRenderTarget->Release();
-	pBrush->Release();
-	// release directwrite
-
-}
-
 // VERY BAD DEBUG CODE
 void TWindow::OnPaint() {
-	HRESULT hr = CreateGraphicsResources();
-	if (SUCCEEDED(hr)) {
+	if (r->CreateTarget()) {
 		PAINTSTRUCT ps;
 		BeginPaint(m_hwnd, &ps);
 
 		// dirty dirty testing code
 
-		pRenderTarget->BeginDraw();
+		r->BeginDraw();
 
-		pRenderTarget->Clear(background);
+		r->Clear(background);
 
 
 		// Draw all Controls. draw in reverse order so element 0 has the highest z-order
 		for (size_t i = controls.length(); 0 < i; i--)
-			controls.get(i - 1)->Draw(pRenderTarget, pBrush, pTextFormat);
+			controls.get(i - 1)->Draw(r);
 
 #ifdef _DEBUG_OVCL
 
@@ -136,9 +88,7 @@ void TWindow::OnPaint() {
 
 		// End Scene
 
-		hr = pRenderTarget->EndDraw();
-
-		if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET) DiscardGraphicsResources();
+		if (!r->EndDraw()) r->DiscardTarget();
 
 		EndPaint(m_hwnd, &ps);
 	}
@@ -146,10 +96,9 @@ void TWindow::OnPaint() {
 
 void TWindow::Resize() {
 	// Resize Direct2D Clientarea
-	if (FAILED(CreateGraphicsResources())) return;
 	RECT rc;
 	GetClientRect(m_hwnd, &rc);
-	pRenderTarget->Resize({ (UINT32)rc.right, (UINT32)rc.bottom });
+	r->Resize();
 	this->Width = rc.right;
 	this->Height = rc.bottom;
 	Update();
@@ -159,10 +108,8 @@ LRESULT TWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	// Window Message Handler
 	switch (uMsg) {
 	case WM_CREATE:
-		// create d2d & directwrite factories
-		if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &pFactory))) return -1;
-		if (FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(pDWriteFactory), reinterpret_cast<IUnknown**>(&pDWriteFactory)))) return -1;
-
+		// create Renderer
+		r = new RendererWin(this);
 		// DEBUG CONSOLE
 #ifdef _DEBUG_OVCL
 		Console::Alloc();
@@ -171,9 +118,8 @@ LRESULT TWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		return 0;
 
 	case WM_DESTROY:
-		DiscardGraphicsResources();
-		pDWriteFactory->Release();
-		pFactory->Release();
+		r->DiscardTarget();
+		r->Destroy();
 		PostQuitMessage(0);
 		return 0;
 
@@ -196,7 +142,7 @@ LRESULT TWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 			for (size_t i = 0; i < controls.length(); i++) {
 				if (controls.get(i)->InBounds(LOWORD(lParam), HIWORD(lParam))) {
-					controls.get(i)->UserInputEvent(InputType::Mouse, 1);
+					controls.get(i)->UserInputEvent(InputType::MouseDown, 0);
 					break;
 				}
 			}
@@ -206,7 +152,7 @@ LRESULT TWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_LBUTTONUP:
 		for (size_t i = 0; i < controls.length(); i++)
-			controls.get(i)->UserInputEvent(InputType::Mouse, 0);
+			controls.get(i)->UserInputEvent(InputType::MouseUp, 0);
 		Update();
 		return 0;
 	}

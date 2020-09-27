@@ -104,7 +104,9 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RendererWin.cpp" />
     <ClCompile Include="TButton.cpp" />
+    <ClCompile Include="TLabel.cpp" />
     <ClCompile Include="TWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +114,8 @@
     <ClInclude Include="Helper\PointerList.h" />
     <ClInclude Include="OpenVCL.h" />
     <ClInclude Include="types.h" />
+    <ClInclude Include="vclcontrols.h" />
+    <ClInclude Include="vclrenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

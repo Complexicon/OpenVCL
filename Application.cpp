@@ -12,7 +12,7 @@ void Application::Initialize() {
 	RegisterClass(&wc);
 }
 
-void Application::Run(TWindow* w) {
+void Application::CreateTWindow(TWindow* w) {
 	CreateWindowExA(
 		w->ExtendedWindowStyle,
 		ClassName,
@@ -25,7 +25,10 @@ void Application::Run(TWindow* w) {
 		GetModuleHandleA(nullptr), w
 	);
 	w->Show();
+}
 
+void Application::Run(TWindow* w) {
+	CreateTWindow(w);
 	// main program loop
 	MSG msg = { 0 };
 	while (GetMessageA(&msg, 0, 0, 0)) {
