@@ -101,15 +101,23 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="TWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Helper\console.h" />
-    <ClInclude Include="Helper\PointerList.h" />
+    <ClInclude Include="console.h" />
     <ClInclude Include="OpenVCL.h" />
+    <ClInclude Include="PointerList.h" />
     <ClInclude Include="types.h" />
     <ClInclude Include="vclcontrols.h" />
     <ClInclude Include="vclrenderer.h" />

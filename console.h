@@ -116,6 +116,13 @@ namespace Console{
         WriteLine(msg);
     }
 
+	template<typename ... Args>
+	void Log(const char* format, int level, Args ... args) {
+		char* buf = new char[snprintf(nullptr, 0, format, args...) + 1];
+		sprintf(buf, format, args...);
+		Log(buf, level);
+		delete[] buf;
+	}
 }
 
 #endif

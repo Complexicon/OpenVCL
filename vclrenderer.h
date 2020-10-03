@@ -45,9 +45,8 @@ public:
 		const size_t cSize = strlen(text) + 1;
 		wchar_t* wc = new wchar_t[cSize];
 		mbstowcs(wc, text, cSize);
-
 		pRenderTarget->DrawTextA(wc, cSize, pTextFormat, TO_BOUNDINGBOX(x, y, width, height), pBrush);
-		delete wc;
+		delete[] wc;
 	};
 
 	void FillRoundedRect(int x, int y, int width, int height, const Color& color, float radius = 1.f) {

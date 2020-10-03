@@ -2,12 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="TWindow.cpp">
-      <Filter>implementation</Filter>
-    </ClCompile>
-    <ClCompile Include="Application.cpp">
-      <Filter>implementation</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OpenVCL.h" />
@@ -17,13 +11,13 @@
     <ClInclude Include="vclrenderer.h">
       <Filter>subclasses</Filter>
     </ClInclude>
-    <ClInclude Include="Helper\PointerList.h">
-      <Filter>tools</Filter>
-    </ClInclude>
     <ClInclude Include="types.h">
       <Filter>tools</Filter>
     </ClInclude>
-    <ClInclude Include="Helper\console.h">
+    <ClInclude Include="console.h">
+      <Filter>tools</Filter>
+    </ClInclude>
+    <ClInclude Include="PointerList.h">
       <Filter>tools</Filter>
     </ClInclude>
   </ItemGroup>
@@ -36,9 +30,6 @@
     </Filter>
     <Filter Include="tools">
       <UniqueIdentifier>{9586f623-9d93-4094-9b99-a3ae0c40211e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="implementation">
-      <UniqueIdentifier>{17a38449-dd67-4f9d-a3c9-99dacb754d60}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
