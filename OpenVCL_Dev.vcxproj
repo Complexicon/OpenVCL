@@ -104,9 +104,6 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="RendererWin.cpp" />
-    <ClCompile Include="TButton.cpp" />
-    <ClCompile Include="TLabel.cpp" />
     <ClCompile Include="TWindow.cpp" />
   </ItemGroup>
   <ItemGroup>

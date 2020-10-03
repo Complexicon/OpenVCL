@@ -16,11 +16,6 @@
 #define BYTE_TO_FLOAT(b) (b / 255.f)
 
 #include <windows.h>
-#include <d2d1.h>
-#include <dwrite.h>
-
-#pragma comment(lib, "d2d1")
-#pragma comment(lib, "dwrite")
 
 #include "Helper/PointerList.h"
 #include "types.h"
@@ -51,25 +46,42 @@ public:
 class TWindow {
 public:
 
-	//GETTER
-	HWND Window();
-	int GetWidth();
-	int GetHeight();
-	int GetWindowX();
-	int GetWindowY();
-	str GetWindowName();
-	uint32 GetCurrentStyle();
 	PointerList<TControl> controls;
 	Color background = Color(0x232323);
 
+	//GETTER
+	HWND Window() { return m_hwnd; };
+	int GetWidth() { return Width; };
+	int GetHeight() { return Height; };
+	int GetWindowX() { return x; };
+	int GetWindowY() { return y; };
+	str GetWindowName() { return WindowName; };
+	uint32 GetCurrentStyle() { return WindowStyle; };
 	int GetLastMouseX() { return lastMouseX; };
 	int GetLastMouseY() { return lastMouseY; };
 
 	//SETTER
-	void SetSize(int Width, int Height);
-	void SetPos(int X, int Y);
-	void SetName(str WindowName);
-	void SetStyle(uint32 WindowStyle);
+	void SetStyle(uint32 WindowStyle) {
+		this->WindowStyle = WindowStyle;
+		if (m_hwnd) SetWindowLongPtr(m_hwnd, GWL_STYLE, WindowStyle);
+	};
+
+	void SetSize(int Width, int Height) {
+		this->Width = Width;
+		this->Height = Height;
+		if (m_hwnd) SetWindowPos(m_hwnd, nullptr, 0, 0, Width, Height, SWP_NOMOVE | SWP_NOZORDER);
+	};
+
+	void SetPos(int X, int Y) {
+		this->x = X;
+		this->y = Y;
+		if (m_hwnd) SetWindowPos(m_hwnd, nullptr, X, Y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+	};
+
+	void SetName(str WindowName) {
+		this->WindowName = WindowName;
+		if (m_hwnd) SetWindowTextA(m_hwnd, WindowName);
+	};
 
 	//Functions
 	void Show(int type = SW_SHOWNORMAL);

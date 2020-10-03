@@ -3,19 +3,10 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TWindow.cpp">
-      <Filter>source files</Filter>
-    </ClCompile>
-    <ClCompile Include="TLabel.cpp">
-      <Filter>source files</Filter>
-    </ClCompile>
-    <ClCompile Include="TButton.cpp">
-      <Filter>source files</Filter>
-    </ClCompile>
-    <ClCompile Include="RendererWin.cpp">
-      <Filter>source files</Filter>
+      <Filter>implementation</Filter>
     </ClCompile>
     <ClCompile Include="Application.cpp">
-      <Filter>source files</Filter>
+      <Filter>implementation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -43,11 +34,11 @@
     <Filter Include="subclasses">
       <UniqueIdentifier>{fd178e4a-54a3-4b9b-9e38-9cc4c057d076}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source files">
-      <UniqueIdentifier>{17a38449-dd67-4f9d-a3c9-99dacb754d60}</UniqueIdentifier>
-    </Filter>
     <Filter Include="tools">
       <UniqueIdentifier>{9586f623-9d93-4094-9b99-a3ae0c40211e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="implementation">
+      <UniqueIdentifier>{17a38449-dd67-4f9d-a3c9-99dacb754d60}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

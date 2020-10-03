@@ -6,39 +6,13 @@
 
 #pragma region Getter
 
-HWND TWindow::Window() { return m_hwnd; }
-int TWindow::GetWidth() { return Width; }
-int TWindow::GetHeight() { return Height; }
-int TWindow::GetWindowX() { return x; }
-int TWindow::GetWindowY() { return y; }
-str TWindow::GetWindowName() { return WindowName; }
-uint32 TWindow::GetCurrentStyle() { return WindowStyle; }
+
 
 #pragma endregion
 
 #pragma region Setter
 
-void TWindow::SetStyle(uint32 WindowStyle) {
-	this->WindowStyle = WindowStyle;
-	if (m_hwnd) SetWindowLongPtr(m_hwnd, GWL_STYLE, WindowStyle);
-}
 
-void TWindow::SetSize(int Width, int Height) {
-	this->Width = Width;
-	this->Height = Height;
-	if (m_hwnd) SetWindowPos(m_hwnd, nullptr, 0, 0, Width, Height, SWP_NOMOVE | SWP_NOZORDER);
-}
-
-void TWindow::SetPos(int X, int Y) {
-	this->x = X;
-	this->y = Y;
-	if (m_hwnd) SetWindowPos(m_hwnd, nullptr, X, Y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-}
-
-void TWindow::SetName(str WindowName) {
-	this->WindowName = WindowName;
-	if (m_hwnd) SetWindowTextA(m_hwnd, WindowName);
-}
 
 #pragma endregion
 

@@ -1,3 +1,4 @@
+#define OPENVCL_APP
 #include "OpenVCL.h"
 #include <cstdio>
 
